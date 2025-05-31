@@ -2,9 +2,15 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { useAuthStore } from '@/store/auth';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, View } from 'react-native';
-import api from '../../utils/api'; // Make sure you have this
+import api from '../../utils/api';
+
+// Google Auth imports
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,6 +19,28 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showOTP, setShowOTP] = useState(false);
   const { login, isLoading } = useAuthStore();
+
+  // Google Auth setup
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: '44910573289-i1jacuj76s6ucco452t539ud2m62fgsm.apps.googleusercontent.com', // your client ID
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      handleGoogleLogin(id_token);
+    }
+  }, [response]);
+
+  const handleGoogleLogin = async (token: string) => {
+    try {
+      const res = await api.post('/api/auth/google-login', { token });
+      // Save tokens/user as needed (e.g., in your auth store)
+      router.replace('/(tabs)');
+    } catch (err) {
+      setError('Google login failed');
+    }
+  };
 
   const handleLogin = async () => {
     try {
@@ -77,6 +105,11 @@ export default function Login() {
               onPress={handleLogin}
               loading={isLoading}
             />
+            <Button
+              title="Sign in with Google"
+              onPress={() => promptAsync()}
+              disabled={!request}
+            />
             <Link href="/register" asChild>
               <Button
                 title="Create Account"
@@ -111,7 +144,6 @@ export default function Login() {
   );
 }
 
-// ...styles (same as before)...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
