@@ -170,7 +170,17 @@ export const login = async (req, res) => {
       const otp = generateOTP();
       user.otp = otp;
       user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-      await sendOTP(user.phoneNumber, otp);
+
+      // Ensure phone number is present and formatted
+      let formattedPhone = user.phoneNumber;
+      if (!formattedPhone) {
+        return res.status(400).json({ message: "User does not have a phone number" });
+      }
+      if (!formattedPhone.startsWith("+")) {
+        formattedPhone = `+91${formattedPhone}`;
+      }
+
+      await sendOTP(formattedPhone, otp);
       await user.save();
 
       return res.status(403).json({ message: "OTP sent. Please verify." });

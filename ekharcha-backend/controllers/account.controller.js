@@ -17,6 +17,7 @@ export const createAccount = async (req, res) => {
       name,
       email,
       username: username || email, // Use email as username if not provided
+      userId: req.user.id, // Assuming req.user.id is set by authentication middleware
     });
     await newAccount.save();
     return res.status(201).json({
@@ -31,7 +32,8 @@ export const createAccount = async (req, res) => {
 
 export const getAccounts = async (req, res) => {
   try {
-    const accounts = await Account.find();
+    
+    const accounts = await Account.find({ userId: req.user.id });
     return res.status(200).json(accounts);
   } catch (error) {
     console.error("Error fetching accounts:", error);
@@ -109,6 +111,7 @@ export const searchtype = async (req, res) => {
       return res.status(400).json({ message: "Type is required" });
     }
     const accounts = await Account.find({ type: type });
+    return res.status(200).json(accounts); // <-- Fix: return accounts, not Accounts
   } catch (error) {
     console.error("Error searching accounts by type:", error);
     return res.status(500).json({ message: "Internal server error" });

@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
-import { useState, useEffect } from 'react';
 
 export default function AnalyticsScreen() {
   const [categoryData, setCategoryData] = useState([

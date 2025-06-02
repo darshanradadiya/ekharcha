@@ -1,43 +1,60 @@
-import { Tabs } from 'expo-router';
-import { Chrome as Home, ChartPie as PieChart, User, Plus } from 'lucide-react-native';
+import { Tabs } from "expo-router";
+import {
+  Chrome as Home,
+  ChartPie as PieChart,
+  Plus,
+  User,
+} from "lucide-react-native";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ 
-      headerShown: false,
-      tabBarStyle: {
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
-      },
-      tabBarActiveTintColor: '#6366F1',
-      tabBarInactiveTintColor: '#6B7280',
-    }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopWidth: 1,
+          borderTopColor: "#E5E7EB",
+        },
+        tabBarActiveTintColor: "#6366F1",
+        tabBarInactiveTintColor: "#6B7280",
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Add',
+          title: "Add",
           tabBarIcon: ({ color, size }) => <Plus size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="analytics"
         options={{
-          title: 'Analytics',
-          tabBarIcon: ({ color, size }) => <PieChart size={size} color={color} />,
+          title: "Analytics",
+          tabBarIcon: ({ color, size }) => (
+            <PieChart size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="accounts" // <-- change from "account" to "accounts"
+        options={{
+          title: "Accounts",
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />

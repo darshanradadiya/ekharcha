@@ -13,8 +13,8 @@ const router = express.Router();
 
 router.use(authenticate);
 
-router.post('/', createAccount);
-router.get('/', getAccounts);
+router.post('/create', createAccount);
+router.get('/get', getAccounts);
 router.get('/search', searchtype);
 router.get('/:id', getAccountById);
 router.put('/:id', updateAccount);

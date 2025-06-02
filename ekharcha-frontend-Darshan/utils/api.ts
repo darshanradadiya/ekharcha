@@ -1,24 +1,32 @@
-import axios from 'axios';
+// src/api/api.js
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
-console.log('🚀 API URL:', process.env.EXPO_PUBLIC_API_URL);
-
+// ✅ Use environment variable from .env
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.170.220:8000",
 });
 
-// Request interceptor add કરો debugging માટે
-api.interceptors.request.use(request => {
-  console.log('📤 Making request to:', request.url);
-  console.log('📤 Full URL:', `${request.baseURL}${request.url}`);
-  return request;
+// 🛡️ Add token to headers
+api.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // 🐞 Debug logs
+  console.log("📤 Request to:", config.url);
+  console.log("🔗 Full URL:", `${config.baseURL}${config.url}`);
+  return config;
 });
 
+// 🐞 Response error log
 api.interceptors.response.use(
-  response => response,
-  error => {
-    console.log('❌ API Error:', error.message);
-    console.log('❌ Request URL:', error.config?.url);
-    console.log('❌ Base URL:', error.config?.baseURL);
+  (response) => response,
+  (error) => {
+    console.log("❌ API Error:", error.message);  
+    console.log("❌ URL:", error.config?.url);
+    console.log("❌ Base URL:", error.config?.baseURL);
     return Promise.reject(error);
   }
 );
