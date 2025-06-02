@@ -33,7 +33,7 @@ export const createAccount = async (req, res) => {
 export const getAccounts = async (req, res) => {
   try {
     
-    const accounts = await Account.find({ userId: req.user.id });
+    const accounts = await Account.find();
     return res.status(200).json(accounts);
   } catch (error) {
     console.error("Error fetching accounts:", error);
