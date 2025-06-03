@@ -61,49 +61,52 @@ export const getAccountById = async (req, res) => {
 
 export const updateAccount = async (req, res) => {
   const { id } = req.params;
-  const { name, email, username } = req.body;
+  const updateData = req.body;
 
   try {
     const account = await Account.findById(id);
     if (!account) {
       return res.status(404).json({ message: "Account not found" });
     }
+    if (!account.userId) {
+      await Account.findByIdAndUpdate(id, updateData, { new: true });
+      return res.status(200).json({ message: "Account updated (no userId)", account });
+    }
     if (account.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-    account.name = name || account.name;
-    account.email = email || account.email;
-    account.username = username || account.username;
-
-    await account.save();
-    return res.status(200).json({
-      message: "Account updated successfully",
-      account,
-    });
+    const updatedAccount = await Account.findByIdAndUpdate(id, updateData, { new: true });
+    return res.status(200).json({ message: "Account updated successfully", account: updatedAccount });
   } catch (error) {
     console.error("Error updating account:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+
 export const deleteAccount = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const account = await Account.findByIdAndDelete(id);
+    const account = await Account.findById(id);
     if (!account) {
       return res.status(404).json({ message: "Account not found" });
+    }
+    // If account has no userId, allow delete (for cleanup)
+    if (!account.userId) {
+      await Account.findByIdAndDelete(id);
+      return res.status(200).json({ message: "Account deleted (no userId)" });
     }
     if (account.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
+    await Account.findByIdAndDelete(id);
     return res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     console.error("Error deleting account:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 export const searchtype = async (req, res) => {
   const { type } = req.query;
   try {
