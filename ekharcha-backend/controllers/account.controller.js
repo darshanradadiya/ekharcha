@@ -1,24 +1,41 @@
 import Account from "../models/account.model.js";
 
+// CREATE ACCOUNT
 export const createAccount = async (req, res) => {
-  const { name, email, username } = req.body;
+  const { name, type, balance, institution, accountNumber } = req.body;
 
   try {
-    if (!name || !email) {
-      return res.status(400).json({ message: "Name, email are required" });
+    // Validate required fields
+    if (
+      !name ||
+      !type ||
+      balance === undefined ||
+      !institution ||
+      !accountNumber
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const existingAccount = await Account.findOne({ email });
-    if (existingAccount) {
-      return res.status(400).json({ message: "User already exists" });
+    // Optionally: check for duplicate accountNumber for this user
+    const existing = await Account.findOne({
+      accountNumber,
+      userId: req.user.id,
+    });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ message: "Account with this number already exists" });
     }
 
     const newAccount = new Account({
       name,
-      email,
-      username: username || email, // Use email as username if not provided
-      userId: req.user.id, // Assuming req.user.id is set by authentication middleware
+      type,
+      balance,
+      institution,
+      accountNumber,
+      userId: req.user.id,
     });
+
     await newAccount.save();
     return res.status(201).json({
       message: "Account created successfully",
@@ -30,13 +47,44 @@ export const createAccount = async (req, res) => {
   }
 };
 
+// UPDATE ACCOUNT
+export const updateAccount = async (req, res) => {
+  const { id } = req.params;
+  const { name, type, balance, institution, accountNumber } = req.body;
+
+  try {
+    const account = await Account.findById(id);
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+    if (account.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Update fields if provided
+    if (name !== undefined) account.name = name;
+    if (type !== undefined) account.type = type;
+    if (balance !== undefined) account.balance = balance;
+    if (institution !== undefined) account.institution = institution;
+    if (accountNumber !== undefined) account.accountNumber = accountNumber;
+
+    await account.save();
+    return res.status(200).json({
+      message: "Account updated successfully",
+      account,
+    });
+  } catch (error) {
+    console.error("Error updating account:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// controllers/account.controller.js
 export const getAccounts = async (req, res) => {
   try {
-    
-    const accounts = await Account.find();
-    return res.status(200).json(accounts);
+    const accounts = await Account.find({ userId: req.user.id });
+    return res.status(200).json({ accounts });
   } catch (error) {
-    console.error("Error fetching accounts:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -58,31 +106,6 @@ export const getAccountById = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
-export const updateAccount = async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  try {
-    const account = await Account.findById(id);
-    if (!account) {
-      return res.status(404).json({ message: "Account not found" });
-    }
-    if (!account.userId) {
-      await Account.findByIdAndUpdate(id, updateData, { new: true });
-      return res.status(200).json({ message: "Account updated (no userId)", account });
-    }
-    if (account.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-    const updatedAccount = await Account.findByIdAndUpdate(id, updateData, { new: true });
-    return res.status(200).json({ message: "Account updated successfully", account: updatedAccount });
-  } catch (error) {
-    console.error("Error updating account:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 
 export const deleteAccount = async (req, res) => {
   const { id } = req.params;

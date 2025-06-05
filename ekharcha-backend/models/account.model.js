@@ -1,33 +1,19 @@
-// models/account.model.js
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const accountSchema = new mongoose.Schema({
-  name : {
+const AccountSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  type: {
     type: String,
+    enum: ["credit", "checking", "savings", "investment"],
     required: true,
   },
-  username : {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  email : {
-    type: String,
-    required: true,
-  },
-  type : {
-    type: String,
-    enum: ['Expanse', 'Income'],
-  },
-  createdAt : {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt : {
-    type: Date,
-    default: Date.now,
-  },
+  balance: { type: Number, required: true },
+  institution: { type: String, required: true },
+  accountNumber: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // You can add timestamps if you want:
+  // createdAt: { type: Date, default: Date.now },
+  // updatedAt: { type: Date, default: Date.now },
 });
 
-const Account = mongoose.model('Account', accountSchema);
-export default Account;
+export default mongoose.model("Account", AccountSchema);
