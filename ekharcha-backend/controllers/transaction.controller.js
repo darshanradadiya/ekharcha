@@ -1,332 +1,88 @@
 import Transaction from "../models/transcation.model.js";
 
-// Helper: Check required fields
-const validateTransactionFields = ({
-  amount,
-  description,
-  date,
-  mode,
-  type,
-}) => {
-  return amount && description && date && mode && type;
-};
-
-// Add Transaction (generic)
+// Add a transaction
 export const addTransaction = async (req, res) => {
-  const {
-    amount,
-    description,
-    date,
-    mode,
-    type,
-    status = "PENDING",
-    isRecurring = false,
-    recurringInterval = null,
-    nextRecurringDate = null,
-    lastProcessedDate = null,
-    receiptUrl = "",
-    categoryId,
-    accountId,
-    tripId,
-  } = req.body;
-
-  if (!validateTransactionFields({ amount, description, date, mode, type })) {
-    return res.status(400).json({ message: "Required fields are missing." });
-  }
-
   try {
+    const { description, amount, date, type } = req.body;
+    if (!description || !amount || !date || !type) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
     const transaction = new Transaction({
-      amount,
       description,
-      date: new Date(date),
-      mode,
+      amount,
+      date,
       type,
-      status,
-      isRecurring,
-      recurringInterval,
-      nextRecurringDate: nextRecurringDate ? new Date(nextRecurringDate) : null,
-      lastProcessedDate: lastProcessedDate ? new Date(lastProcessedDate) : null,
-      receiptUrl,
-      categoryId,
-      accountId,
-      tripId,
       userId: req.user.id,
     });
-
     await transaction.save();
+    res.status(201).json({ transaction });
+  } catch (err) {
     res
-      .status(201)
-      .json({ message: "Transaction added successfully", transaction });
-  } catch (error) {
-    console.error("Add Transaction Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+      .status(500)
+      .json({ message: "Failed to add transaction", error: err.message });
   }
 };
 
-// Get all user transactions
+// Get all transactions for the logged-in user
 export const getAllTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.user.id })
-      .populate("categoryId", "name")
-      .populate("accountId", "name")
-      .populate("tripId", "name");
-
-    res.status(200).json(transactions);
-  } catch (error) {
-    console.error("Fetch All Transactions Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    const transactions = await Transaction.find({ userId: req.user.id }).sort({
+      date: -1,
+    });
+    res.json(transactions);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch transactions", error: err.message });
   }
 };
 
-// Get a transaction by ID
+// (Optional) Get a single transaction by ID
 export const getTransactionById = async (req, res) => {
   try {
-    const transaction = await Transaction.findById(req.params.id)
-      .populate("categoryId", "name")
-      .populate("accountId", "name")
-      .populate("tripId", "name");
-
-    if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
-
-    if (transaction.userId.toString() !== req.user.id)
-      return res.status(403).json({ message: "Unauthorized" });
-
-    res.status(200).json(transaction);
-  } catch (error) {
-    console.error("Fetch Transaction by ID Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Edit Transaction (Generic)
-export const editTransaction = async (req, res) => {
-  try {
-    const transaction = await Transaction.findById(req.params.id);
-    if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
-
-    if (transaction.userId.toString() !== req.user.id)
-      return res.status(403).json({ message: "Unauthorized" });
-
-    const {
-      amount,
-      description,
-      date,
-      mode,
-      status,
-      accountId,
-      categoryId,
-      tripId,
-      isRecurring,
-      recurringInterval,
-      receiptUrl,
-    } = req.body;
-
-    Object.assign(transaction, {
-      amount: amount ?? transaction.amount,
-      description: description ?? transaction.description,
-      date: date ? new Date(date) : transaction.date,
-      mode: mode ?? transaction.mode,
-      status: status ?? transaction.status,
-      accountId: accountId ?? transaction.accountId,
-      categoryId: categoryId ?? transaction.categoryId,
-      tripId: tripId ?? transaction.tripId,
-      isRecurring: isRecurring ?? transaction.isRecurring,
-      recurringInterval: recurringInterval ?? transaction.recurringInterval,
-      receiptUrl: receiptUrl ?? transaction.receiptUrl,
+    const txn = await Transaction.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
     });
-
-    await transaction.save();
-
+    if (!txn) return res.status(404).json({ message: "Transaction not found" });
+    res.json({ transaction: txn });
+  } catch (err) {
     res
-      .status(200)
-      .json({ message: "Transaction updated successfully", transaction });
-  } catch (error) {
-    console.error("Edit Transaction Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+      .status(500)
+      .json({ message: "Failed to fetch transaction", error: err.message });
   }
 };
 
-// Delete transaction
+// (Optional) Delete a transaction
 export const deleteTransaction = async (req, res) => {
   try {
-    const transaction = await Transaction.findById(req.params.id);
-    if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
-
-    if (transaction.userId.toString() !== req.user.id)
-      return res.status(403).json({ message: "Unauthorized" });
-
-    await transaction.deleteOne();
-
-    res.status(200).json({ message: "Transaction deleted successfully" });
-  } catch (error) {
-    console.error("Delete Transaction Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Get transactions by type (INCOME / EXPENSE)
-export const getTransactionsByType = async (req, res) => {
-  try {
-    const transactions = await Transaction.find({
+    const txn = await Transaction.findOneAndDelete({
+      _id: req.params.id,
       userId: req.user.id,
-      type: req.params.type.toUpperCase(),
-    })
-      .populate("categoryId", "name")
-      .populate("accountId", "name")
-      .populate("tripId", "name");
-
-    res.status(200).json(transactions);
-  } catch (error) {
-    console.error("Get Transactions by Type Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    });
+    if (!txn) return res.status(404).json({ message: "Transaction not found" });
+    res.json({ message: "Transaction deleted" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete transaction", error: err.message });
   }
 };
 
-// Calculate total amount by type
-export const calculateTotalAmount = async (req, res) => {
+// (Optional) Edit a transaction
+export const editTransaction = async (req, res) => {
   try {
-    const result = await Transaction.aggregate([
-      {
-        $match: {
-          userId: req.user.id,
-          type: req.params.type.toUpperCase(),
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" },
-        },
-      },
-    ]);
-
-    res.status(200).json({ total: result[0]?.total || 0 });
-  } catch (error) {
-    console.error("Calculate Total Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Transaction summary (INCOME, EXPENSE, BALANCE)
-export const getTransactionSummary = async (req, res) => {
-  try {
-    const summary = await Transaction.aggregate([
-      { $match: { userId: req.user.id } },
-      {
-        $group: {
-          _id: "$type",
-          total: { $sum: "$amount" },
-        },
-      },
-    ]);
-
-    const result = { INCOME: 0, EXPENSE: 0 };
-    summary.forEach((item) => (result[item._id] = item.total));
-    const balance = result.INCOME - result.EXPENSE;
-
-    res.status(200).json({ ...result, balance });
-  } catch (error) {
-    console.error("Get Summary Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Monthly summary grouped by type
-export const getMonthlySummary = async (req, res) => {
-  try {
-    const summary = await Transaction.aggregate([
-      { $match: { userId: req.user.id } },
-      {
-        $group: {
-          _id: {
-            month: { $month: "$date" },
-            year: { $year: "$date" },
-            type: "$type",
-          },
-          total: { $sum: "$amount" },
-        },
-      },
-      { $sort: { "_id.year": -1, "_id.month": -1 } },
-    ]);
-
-    res.status(200).json(summary);
-  } catch (error) {
-    console.error("Monthly Summary Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Transactions by category
-export const getTransactionsByCategory = async (req, res) => {
-  try {
-    const transactions = await Transaction.find({
-      userId: req.user.id,
-      categoryId: req.params.categoryId,
-    })
-      .populate("categoryId", "name")
-      .populate("accountId", "name")
-      .populate("tripId", "name");
-
-    res.status(200).json(transactions);
-  } catch (error) {
-    console.error("Category Transactions Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Transactions by account
-export const getTransactionsByAccount = async (req, res) => {
-  try {
-    const transactions = await Transaction.find({
-      userId: req.user.id,
-      accountId: req.params.accountId,
-    })
-      .populate("categoryId", "name")
-      .populate("accountId", "name")
-      .populate("tripId", "name");
-
-    res.status(200).json(transactions);
-  } catch (error) {
-    console.error("Account Transactions Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Category-wise summary
-export const getCategorywiseSummary = async (req, res) => {
-  try {
-    const summary = await Transaction.aggregate([
-      { $match: { userId: req.user.id } },
-      {
-        $group: {
-          _id: "$categoryId",
-          total: { $sum: "$amount" },
-        },
-      },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "_id",
-          foreignField: "_id",
-          as: "category",
-        },
-      },
-      { $unwind: "$category" },
-      {
-        $project: {
-          _id: 0,
-          categoryName: "$category.name",
-          total: 1,
-        },
-      },
-    ]);
-
-    res.status(200).json(summary);
-  } catch (error) {
-    console.error("Category Summary Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    const { description, amount, date, type } = req.body;
+    const txn = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { description, amount , date, type },
+      { new: true }
+    );
+    if (!txn) return res.status(404).json({ message: "Transaction not found" });
+    res.json({ transaction: txn });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to update transaction", error: err.message });
   }
 };

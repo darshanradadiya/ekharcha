@@ -1,4 +1,4 @@
-import { Transaction, Budget, Account, MonthlyData } from '@/types/types';
+import { Account, Budget, MonthlyData, Transaction } from '@/types/types';
 
 // Mock transactions data
 export const mockTransactions: Transaction[] = [
@@ -85,50 +85,50 @@ export const mockTransactions: Transaction[] = [
 ];
 
 // Mock budget data
-export const mockBudgets: Budget[] = [
-  {
-    category: 'Food',
-    budgeted: 500,
-    spent: 320.75,
-    color: '#EF4444',
-    status: 'on-track'
-  },
-  {
-    category: 'Transportation',
-    budgeted: 300,
-    spent: 280.50,
-    color: '#F59E0B',
-    status: 'warning'
-  },
-  {
-    category: 'Entertainment',
-    budgeted: 200,
-    spent: 215.99,
-    color: '#8B5CF6',
-    status: 'over-budget'
-  },
-  {
-    category: 'Utilities',
-    budgeted: 350,
-    spent: 190.45,
-    color: '#3B82F6',
-    status: 'under-budget'
-  },
-  {
-    category: 'Shopping',
-    budgeted: 400,
-    spent: 210.25,
-    color: '#10B981',
-    status: 'on-track'
-  },
-  {
-    category: 'Healthcare',
-    budgeted: 150,
-    spent: 95.50,
-    color: '#EC4899',
-    status: 'under-budget'
-  }
-];
+// export const mockBudgets: Budget[] = [
+//   {
+//     category: 'Food',
+//     budgeted: 500,
+//     spent: 320.75,
+//     color: '#EF4444',
+//     status: 'on-track'
+//   },
+//   {
+//     category: 'Transportation',
+//     budgeted: 300,
+//     spent: 280.50,
+//     color: '#F59E0B',
+//     status: 'warning'
+//   },
+//   {
+//     category: 'Entertainment',
+//     budgeted: 200,
+//     spent: 215.99,
+//     color: '#8B5CF6',
+//     status: 'over-budget'
+//   },
+//   {
+//     category: 'Utilities',
+//     budgeted: 350,
+//     spent: 190.45,
+//     color: '#3B82F6',
+//     status: 'under-budget'
+//   },
+//   {
+//     category: 'Shopping',
+//     budgeted: 400,
+//     spent: 210.25,
+//     color: '#10B981',
+//     status: 'on-track'
+//   },
+//   {
+//     category: 'Healthcare',
+//     budgeted: 150,
+//     spent: 95.50,
+//     color: '#EC4899',
+//     status: 'under-budget'
+//   }
+// ];
 
 // Mock accounts data
 export const mockAccounts: Account[] = [

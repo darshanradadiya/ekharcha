@@ -1,34 +1,34 @@
+import { Transaction } from "../types/types";
 import api from "./api";
 
-export const getTransactions = async () =>
-  (await api.get("/api/transactions")).data;
+// Get all transactions for the logged-in user
+export const getTransactions = async (): Promise<Transaction[]> => {
+  const res = await api.get("/api/transactions");
+  return res.data;
+};
 
-export const getTransactionById = async (id: string) =>
-  (await api.get(`/api/transactions/${id}`)).data;
+// Add a new transaction
+export const createTransaction = async (data: {
+  description: string;
+  amount: number;
+  date: string;
+  type: "income" | "expense";
+  // category?: string; // Remove if not needed
+}): Promise<Transaction> => {
+  const res = await api.post("/api/transactions", data);
+  return res.data.transaction;
+};
 
-export const createTransaction = async (txn: any) =>
-  (await api.post("/api/transactions", txn)).data.transaction;
+// Edit a transaction
+export const updateTransaction = async (
+  id: string,
+  data: Partial<Transaction>
+): Promise<Transaction> => {
+  const res = await api.put(`/api/transactions/${id}`, data);
+  return res.data.transaction;
+};
 
-export const updateTransaction = async (id: string, txn: any) =>
-  (await api.put(`/api/transactions/${id}`, txn)).data.transaction;
-
-export const deleteTransaction = async (id: string) =>
-  (await api.delete(`/api/transactions/${id}`)).data;
-
-export const getTransactionsByType = async (type: string) =>
-  (await api.get(`/api/transactions/type/${type}`)).data;
-
-export const getTransactionsByAccount = async (accountId: string) =>
-  (await api.get(`/api/transactions/account/${accountId}`)).data;
-
-export const getTransactionsByCategory = async (categoryId: string) =>
-  (await api.get(`/api/transactions/category/${categoryId}`)).data;
-
-export const getTransactionSummary = async () =>
-  (await api.get("/api/transactions/summary")).data;
-
-export const getMonthlySummary = async () =>
-  (await api.get("/api/transactions/monthly")).data;
-
-export const getCategorywiseSummary = async () =>
-  (await api.get("/api/transactions/category-summary")).data;
+// Delete a transaction
+export const deleteTransaction = async (id: string): Promise<void> => {
+  await api.delete(`/api/transactions/${id}`);
+};
