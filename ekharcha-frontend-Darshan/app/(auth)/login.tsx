@@ -9,6 +9,7 @@ import api from '../../utils/api';
 // Google Auth imports
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import DashboardScreen from '../(tabs)/dashboard';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -36,7 +37,7 @@ export default function Login() {
     try {
       const res = await api.post('/api/auth/google-login', { token });
       // Save tokens/user as needed (e.g., in your auth store)
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/dashboard');
     } catch (err) {
       setError('Google login failed');
     }
@@ -45,11 +46,9 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       setError('');
-      // Try normal login
       await login(email, password);
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/dashboard'); // always go to dashboard after login
     } catch (err: any) {
-      // If backend returns 403, show OTP input
       if (err?.response?.status === 403) {
         setShowOTP(true);
         Alert.alert('OTP Sent', 'Please check your phone for the OTP.');
@@ -59,18 +58,18 @@ export default function Login() {
     }
   };
 
-  const handleVerifyOTP = async () => {
-    try {
-      setError('');
-      // Call backend to verify OTP
-      const res = await api.post('/api/auth/verify-login-otp', { email, otp });
-      // Save tokens/user as needed, then route
-      // You may want to update your auth store here
-      router.replace('/(tabs)');
-    } catch (err) {
-      setError('Invalid or expired OTP');
-    }
-  };
+  // const handleVerifyOTP = async () => {
+  //   try {
+  //     setError('');
+  //     // Call backend to verify OTP
+  //     const res = await api.post('/api/auth/verify-login-otp', { email, otp });
+  //     // Save tokens/user as needed, then route
+  //     // You may want to update your auth store here
+  //     router.replace('/(tabs)');
+  //   } catch (err) {
+  //     setError('Invalid or expired OTP');
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -127,11 +126,11 @@ export default function Login() {
               placeholder="Enter the OTP"
               error={error}
             />
-            <Button
+            {/* <Button
               title="Verify OTP"
-              onPress={handleVerifyOTP}
+              // onPress={handleVerifyOTP}
               loading={isLoading}
-            />
+            /> */}
             <Button
               title="Back to Login"
               variant="outline"

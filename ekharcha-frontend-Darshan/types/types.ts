@@ -22,7 +22,7 @@ export interface Budget {
 
 export interface Account {
   _id: number;
-  id: number;
+  id: string;
   name: string;
   type: 'checking' | 'savings' | 'credit' | 'investment';
   balance: number;

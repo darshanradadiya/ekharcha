@@ -12,6 +12,7 @@ api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("🔑 Token added to request headers" , token);
   }
 
   // 🐞 Debug logs
@@ -30,5 +31,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// console.log("🔑 Using token:", token); // 'token' is not defined in this scope
 
 export default api;

@@ -78,7 +78,7 @@ export default function Accounts() {
               key={String(account._id)}
               account={{
                 ...account,
-                // _id: Number(account._id),
+                _id: Number(account._id),
                 id: account._id ?? String(account._id),
                 type: account.type as
                   | "credit"
@@ -103,14 +103,20 @@ export default function Accounts() {
       <CreateAccountModal
         visible={showCreate}
         onClose={() => setShowCreate(false)}
-        onCreated={fetchAccounts}
+        onCreated={() => {
+          setShowCreate(false);
+          fetchAccounts();
+        }}
       />
       {selectedAccount && (
         <UpdateAccountModal
           visible={showUpdate}
           onClose={() => setShowUpdate(false)}
           account={selectedAccount}
-          onUpdated={fetchAccounts}
+          onUpdated={() => {
+            setShowUpdate(false);
+            fetchAccounts();
+          }}
         />
       )}
     </SafeAreaView>

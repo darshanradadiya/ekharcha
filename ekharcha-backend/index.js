@@ -6,9 +6,9 @@ import mongoose from "mongoose";
 import accountRoutes from "./routes/account.route.js";
 import budgetRoutes from "./routes/budget.route.js";
 import categoryRoutes from "./routes/category.route.js";
+import dashboardRoutes from "./routes/dashboard.route.js";
 import transactionRoutes from "./routes/transaction.route.js";
 import authRoutes from "./routes/user.route.js";
-
 dotenv.config();
 
 const app = express();
@@ -35,6 +35,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // ✅ MongoDB Connection
 mongoose.connect(MONGO_URI)

@@ -1,20 +1,45 @@
+import Account from "../models/account.model.js";
+import Budget from "../models/budget.model.js";
 import Transaction from "../models/transcation.model.js";
 
-// Add a transaction
 export const addTransaction = async (req, res) => {
   try {
-    const { description, amount, date, type } = req.body;
-    if (!description || !amount || !date || !type) {
+    const { description, amount, date, type, accountId, category } = req.body;
+    if (!description || !amount || !date || !type || !accountId) {
       return res.status(400).json({ message: "All fields are required." });
     }
+
+    // 1. Create transaction
     const transaction = new Transaction({
       description,
       amount,
       date,
       type,
+      accountId : req.body.accountId,
+      category : req.body.category,
       userId: req.user.id,
     });
     await transaction.save();
+
+    // 2. Update account balance
+    const account = await Account.findById(accountId);
+    if (!account) return res.status(404).json({ message: "Account not found" });
+    if (type === "expense") {
+      account.balance -= amount;
+    } else {
+      account.balance += amount;
+    }
+    await account.save();
+
+    // 3. Update budget spent (if category and budget exist)
+    if (category) {
+      const budget = await Budget.findOne({ userId: req.user.id, category });
+      if (budget) {
+        budget.spent += type === "expense" ? amount : 0;
+        await budget.save();
+      }
+    }
+
     res.status(201).json({ transaction });
   } catch (err) {
     res
@@ -75,7 +100,7 @@ export const editTransaction = async (req, res) => {
     const { description, amount, date, type } = req.body;
     const txn = await Transaction.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { description, amount , date, type },
+      { description, amount, date, type },
       { new: true }
     );
     if (!txn) return res.status(404).json({ message: "Transaction not found" });

@@ -108,7 +108,7 @@ export default function RegisterWithOTP() {
       });
 
       Alert.alert("Success", "Your account is verified!");
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/dashboard");
     } catch (error: unknown) {
       const err = error as AxiosError<{ message: string }>;
       const message =

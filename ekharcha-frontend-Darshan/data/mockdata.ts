@@ -1,4 +1,4 @@
-import { Account, Budget, MonthlyData, Transaction } from '@/types/types';
+import { MonthlyData, Transaction } from '@/types/types';
 
 // Mock transactions data
 export const mockTransactions: Transaction[] = [
@@ -131,46 +131,46 @@ export const mockTransactions: Transaction[] = [
 // ];
 
 // Mock accounts data
-export const mockAccounts: Account[] = [
-  // ...existing code...
-  {
-      _id: 1, // or use a number that matches your schema
-      id: 1,
-      name: 'Main Checking',
-      type: 'checking',
-      balance: 5240.83,
-      institution: 'Chase Bank',
-      accountNumber: '1234567890'
-  },
-  // ...existing code...
-  {
-  _id: 2, // or use a number that matches your schema
-    id: 2,
-    name: 'Savings Account',
-    type: 'savings',
-    balance: 10450.25,
-    institution: 'Bank of America',
-    accountNumber: '0987654321'
-  },
-  {
-  _id: 3, // or use a number that matches your schema
-    id: 3,
-    name: 'Visa Credit Card',
-    type: 'credit',
-    balance: -2540.63,
-    institution: 'Citibank',
-    accountNumber: '5555666677778888'
-  },
-  {
-  _id: 4, // or use a number that matches your schema
-    id: 4,
-    name: 'Investment Portfolio',
-    type: 'investment',
-    balance: 35250.80,
-    institution: 'Fidelity',
-    accountNumber: '1122334455'
-  }
-];
+// export const mockAccounts: Account[] = [
+//   // ...existing code...
+//   {
+//       _id: 1, // or use a number that matches your schema
+//       id: 1,
+//       name: 'Main Checking',
+//       type: 'checking',
+//       balance: 5240.83,
+//       institution: 'Chase Bank',
+//       accountNumber: '1234567890'
+//   },
+//   // ...existing code...
+//   {
+//   _id: 2, // or use a number that matches your schema
+//     id: 2,
+//     name: 'Savings Account',
+//     type: 'savings',
+//     balance: 10450.25,
+//     institution: 'Bank of America',
+//     accountNumber: '0987654321'
+//   },
+//   {
+//   _id: 3, // or use a number that matches your schema
+//     id: 3,
+//     name: 'Visa Credit Card',
+//     type: 'credit',
+//     balance: -2540.63,
+//     institution: 'Citibank',
+//     accountNumber: '5555666677778888'
+//   },
+//   {
+//   _id: 4, // or use a number that matches your schema
+//     id: 4,
+//     name: 'Investment Portfolio',
+//     type: 'investment',
+//     balance: 35250.80,
+//     institution: 'Fidelity',
+//     accountNumber: '1122334455'
+//   }
+// ];
 
 // Mock monthly data for charts
 export const mockMonthlyData: MonthlyData[] = [

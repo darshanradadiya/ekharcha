@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AddTransactionModal from "../../components/transcations/AddTransactionModal";
+import AddTransactionModal  from "../../components/transcations/AddTransactionModal";
 import TransactionItem from "../../components/transcations/TransactionItem";
 import { Transaction } from "../../types/types";
 import { getTransactions } from "../../utils/transactionApi";
