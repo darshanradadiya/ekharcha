@@ -10,12 +10,15 @@ export interface Transaction {
 }
 
 export interface Budget {
+  _id: string;
   category: string;
   budgeted: number;
   spent: number;
-  color: string;
-  status: 'on-track' | 'warning' | 'over-budget' | 'under-budget';
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
+
 
 export interface Account {
   _id: number;

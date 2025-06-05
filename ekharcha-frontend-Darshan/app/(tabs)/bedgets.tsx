@@ -1,17 +1,37 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import AddBudgetModal from '../../components/budgets/AddBudgetModal';
 import BudgetCategoryList from '../../components/budgets/BudgetCategorylist';
 import BudgetSummary from '../../components/budgets/Budgetsummry';
-import { mockBudgets } from '../../data/mockdata';
+import { Budget } from '../../types/types';
+import { getBudgets } from '../../utils/budgetApi';
 
 export default function BudgetsScreen() {
-  // Calculate budget totals
-  const totalBudgeted = mockBudgets.reduce((sum, budget) => sum + budget.budgeted, 0);
-  const totalSpent = mockBudgets.reduce((sum, budget) => sum + budget.spent, 0);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showAdd, setShowAdd] = useState(false);
+
+  useEffect(() => {
+    fetchBudgets();
+  }, []);
+
+  const fetchBudgets = async () => {
+    try {
+      setLoading(true);
+      const data = await getBudgets();
+      setBudgets(data);
+    } catch (err) {
+      console.error("Failed to fetch budgets:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalBudgeted = budgets.reduce((sum, b) => sum + b.budgeted, 0);
+  const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const remaining = totalBudgeted - totalSpent;
-  const percentUsed = Math.round((totalSpent / totalBudgeted) * 100);
+  const percentUsed = totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -22,20 +42,36 @@ export default function BudgetsScreen() {
           </Text>
           <Text style={styles.subtitle}>Budget Overview</Text>
         </View>
-        
+
         <BudgetSummary
           totalBudgeted={totalBudgeted}
           totalSpent={totalSpent}
           remaining={remaining}
           percentUsed={percentUsed}
         />
-        
+
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Budget Categories</Text>
+          <Button title="Add Budget" onPress={() => setShowAdd(true)} />
         </View>
-        
-        <BudgetCategoryList budgets={mockBudgets} />
+
+        {loading ? (
+          <Text style={{ textAlign: 'center', marginTop: 20, color: '#64748B' }}>
+            Loading budgets...
+          </Text>
+        ) : budgets.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 20, color: '#64748B' }}>
+            No budgets found.
+          </Text>
+        ) : (
+          <BudgetCategoryList budgets={budgets} onSpentAdded={fetchBudgets} />
+        )}
       </ScrollView>
+      <AddBudgetModal
+        visible={showAdd}
+        onClose={() => setShowAdd(false)}
+        onCreated={fetchBudgets}
+      />
     </SafeAreaView>
   );
 }

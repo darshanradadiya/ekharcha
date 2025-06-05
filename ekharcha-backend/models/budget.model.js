@@ -1,22 +1,31 @@
 import mongoose from 'mongoose';
 
 const budgetSchema = new mongoose.Schema({
-  amount: {
+  category: {
+    type: String,
+    required: true,
+  },
+  budgeted: {
     type: Number,
-    required: true
+    required: true,
+  },
+  spent: {
+    type: Number,
+    required: true,
+    default: 0,
   },
   lastAlertSent: {
     type: Date,
-    default: null
+    default: null,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
-  }
+    required: true,
+  },
 }, {
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 });
 
 export const Budget = mongoose.model('Budget', budgetSchema);

@@ -1,20 +1,24 @@
 import {
-    Briefcase,
-    CreditCard,
-    DollarSign,
-    PiggyBank,
+  Briefcase,
+  CreditCard,
+  DollarSign,
+  Pencil,
+  PiggyBank,
+  Trash2,
 } from "lucide-react-native";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Account } from "../../types/types";
-import { deleteAccount, getAccounts } from "../../utils/accountApi";
+import { deleteAccount } from "../../utils/accountApi";
 
 interface AccountCardProps {
   account: Account;
+  onEdit?: (account: Account) => void;
+  onDeleted?: () => void;
 }
 
-const AccountCard = ({ account }: AccountCardProps) => {
-  const { name, type, balance, institution, accountNumber } = account;
+const AccountCard = ({ account, onEdit, onDeleted }: AccountCardProps) => {
+  const { name, type, balance, institution, accountNumber, _id } = account;
 
   const getAccountIcon = () => {
     switch (type) {
@@ -50,10 +54,26 @@ const AccountCard = ({ account }: AccountCardProps) => {
     return `••••${number.slice(-4)}`;
   };
 
-  // In your AccountCard or AccountsScreen
-  const handleDelete = async (id: string) => {
-    await deleteAccount(id);
-    fetchAccounts(); // Refresh the list after deletion
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete this account?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount(String(_id));
+              if (onDeleted) onDeleted();
+            } catch {
+              Alert.alert("Error", "Failed to delete account.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -100,6 +120,23 @@ const AccountCard = ({ account }: AccountCardProps) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Details</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.editDeleteContainer}>
+        <TouchableOpacity
+          style={[styles.iconButton, styles.editButton]}
+          onPress={() => onEdit && onEdit(account)}
+        >
+          <Pencil size={18} color="#3B82F6" />
+          <Text style={styles.editDeleteText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.iconButton, styles.deleteButton]}
+          onPress={handleDelete}
+        >
+          <Trash2 size={18} color="#EF4444" />
+          <Text style={[styles.editDeleteText, { color: "#EF4444" }]}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -201,19 +238,33 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#3B82F6",
   },
+  editDeleteContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 12,
+  },
+  iconButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  editButton: {
+    backgroundColor: "#F1F5F9",
+    marginRight: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#F1F5F9",
+  },
+  editDeleteText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#3B82F6",
+  },
 });
 
 export default AccountCard;
-// Fetches the latest list of accounts from the API
-async function fetchAccounts() {
-  try {
-    const accounts = await getAccounts();
-    // You might want to update state or context here with the fetched accounts
-    // For example: setAccounts(accounts);
-    return accounts;
-  } catch (error) {
-    console.error("Failed to fetch accounts:", error);
-    return [];
-  }
-}
-

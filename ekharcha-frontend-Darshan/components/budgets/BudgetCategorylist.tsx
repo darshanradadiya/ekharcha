@@ -1,59 +1,48 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
 import { TriangleAlert as AlertTriangle, TrendingUp, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { Budget } from '../../types/types';
+import AddSpentModal from './AddSpentModal';
 
 interface BudgetCategoryListProps {
   budgets: Budget[];
+  onSpentAdded: () => void;
 }
 
-const BudgetCategoryList = ({ budgets }: BudgetCategoryListProps) => {
+const BudgetCategoryList = ({ budgets, onSpentAdded }: BudgetCategoryListProps) => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const openModal = (category: string) => {
+    setSelectedCategory(category);
+    setShowModal(true);
+  };
+
   const renderBudgetItem = ({ item }: { item: Budget }) => {
     const percentage = Math.round((item.spent / item.budgeted) * 100);
     const isOverBudget = item.spent > item.budgeted;
-    
+
     const getBadgeIcon = () => {
-      switch (item.status) {
-        case 'over-budget':
-          return <AlertTriangle size={14} color="#FFFFFF" />;
-        case 'warning':
-          return <AlertTriangle size={14} color="#FFFFFF" />;
-        case 'under-budget':
-          return <TrendingUp size={14} color="#FFFFFF" />;
-        case 'on-track':
-        default:
-          return <CheckCircle size={14} color="#FFFFFF" />;
-      }
+      if (isOverBudget) return <AlertTriangle size={14} color="#FFFFFF" />;
+      if (percentage > 90) return <AlertTriangle size={14} color="#FFFFFF" />;
+      if (percentage < 50) return <TrendingUp size={14} color="#FFFFFF" />;
+      return <CheckCircle size={14} color="#FFFFFF" />;
     };
-    
+
     const getBadgeStyle = () => {
-      switch (item.status) {
-        case 'over-budget':
-          return styles.badgeOverBudget;
-        case 'warning':
-          return styles.badgeWarning;
-        case 'under-budget':
-          return styles.badgeUnderBudget;
-        case 'on-track':
-        default:
-          return styles.badgeOnTrack;
-      }
+      if (isOverBudget) return styles.badgeOverBudget;
+      if (percentage > 90) return styles.badgeWarning;
+      if (percentage < 50) return styles.badgeUnderBudget;
+      return styles.badgeOnTrack;
     };
-    
+
     const getBadgeText = () => {
-      switch (item.status) {
-        case 'over-budget':
-          return 'Over budget';
-        case 'warning':
-          return 'Near limit';
-        case 'under-budget':
-          return 'Under budget';
-        case 'on-track':
-        default:
-          return 'On track';
-      }
+      if (isOverBudget) return 'Over budget';
+      if (percentage > 90) return 'Near limit';
+      if (percentage < 50) return 'Under budget';
+      return 'On track';
     };
-    
+
     return (
       <View style={styles.budgetItem}>
         <View style={styles.budgetHeader}>
@@ -63,29 +52,31 @@ const BudgetCategoryList = ({ budgets }: BudgetCategoryListProps) => {
             <Text style={styles.badgeText}>{getBadgeText()}</Text>
           </View>
         </View>
-        
+
         <View style={styles.budgetDetails}>
           <View style={styles.amountsContainer}>
             <Text style={styles.spentAmount}>${item.spent.toFixed(2)}</Text>
             <Text style={styles.budgetedAmount}> / ${item.budgeted.toFixed(2)}</Text>
           </View>
-          
           <Text style={styles.percentageText}>{percentage}%</Text>
         </View>
-        
+
         <View style={styles.progressBarContainer}>
-          <View 
+          <View
             style={[
-              styles.progressBar, 
-              isOverBudget ? styles.progressBarOver : { width: `${percentage}%` },
-              { backgroundColor: item.color }
-            ]} 
+              styles.progressBar,
+              isOverBudget
+                ? styles.progressBarOver
+                : { width: `${Math.min(percentage, 100)}%` },
+              { backgroundColor: isOverBudget ? "#EF4444" : "#3B82F6" }
+            ]}
           />
         </View>
+        <Button title="Add Spent" onPress={() => openModal(item.category)} />
       </View>
     );
   };
-  
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -93,6 +84,12 @@ const BudgetCategoryList = ({ budgets }: BudgetCategoryListProps) => {
         renderItem={renderBudgetItem}
         keyExtractor={(item) => item.category}
         scrollEnabled={false}
+      />
+      <AddSpentModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        category={selectedCategory || ""}
+        onAdded={onSpentAdded}
       />
     </View>
   );
@@ -178,6 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     borderRadius: 4,
     overflow: 'hidden',
+    marginBottom: 8,
   },
   progressBar: {
     height: 8,
