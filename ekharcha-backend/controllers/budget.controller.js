@@ -28,7 +28,7 @@ export const createBudget = async (req, res) => {
 export const getBudgets = async (req, res) => {
   try {
     const budgets = await Budget.find({ userId: req.user.id });
-    return res.status(200).json(budgets);
+    return res.status(200).json({ budgets });
   } catch (error) {
     console.error("Error fetching budgets:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -113,7 +113,7 @@ export const getBudgetsByCategory = async (req, res) => {
       category: new RegExp(category, 'i'), // Case-insensitive search
     });
 
-    return res.status(200).json(budgets);
+    return res.status(200).json({ budgets });
   } catch (error) {
     console.error("Error fetching budgets by category:", error);
     return res.status(500).json({ message: "Internal server error" });

@@ -3,11 +3,9 @@ import api from "./api";
 
 // Get all budgets
 export const getBudgets = async (): Promise<Budget[]> => {
-  // Assumes your backend returns { budgets: Budget[] }
   const res = await api.get<{ budgets: Budget[] }>("/api/budget");
   return res.data.budgets;
 };
-
 // Get budget by ID
 export const getBudgetById = async (id: string): Promise<Budget> => {
   const res = await api.get<{ budget: Budget }>(`/api/budget/${id}`);
