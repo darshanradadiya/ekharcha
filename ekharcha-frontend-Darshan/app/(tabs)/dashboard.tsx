@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { Plus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  RefreshControl,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +22,13 @@ import { getDashboardSummary } from "../../utils/dashboard";
 export default function DashboardScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchSummary();
+    setRefreshing(false);
+  }, []);
   const [summary, setSummary] = useState<{
     totalIncome: number;
     totalExpense: number;
@@ -58,6 +66,13 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#3B82F6"]}
+          />
+        }
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
       >

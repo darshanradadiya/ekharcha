@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  RefreshControl,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +21,13 @@ export default function Accounts() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAccounts();
+    setRefreshing(false);
+  };
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const fetchAccounts = async () => {
@@ -51,7 +59,17 @@ export default function Accounts() {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#3B82F6"]}
+            tintColor="#3B82F6"
+          />
+        }
+      >
         <AccountSummary
           totalBalance={totalBalance}
           assetsBalance={assetsBalance}

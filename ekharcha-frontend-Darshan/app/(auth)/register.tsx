@@ -1,5 +1,6 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -13,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useAuthStore } from "../../store/auth";
 import api from "../../utils/api";
 
 type FieldErrors = {
@@ -57,6 +59,7 @@ export default function RegisterWithOTP() {
     return newErrors;
   }, [otp]);
 
+  // ...existing code...
   const handleRegister = useCallback(async () => {
     const validationErrors = validateRegister();
     if (Object.keys(validationErrors).length > 0) {
@@ -68,15 +71,20 @@ export default function RegisterWithOTP() {
     setIsLoading(true);
 
     try {
-      // ...existing code...
-      await api.post("/api/auth/register", {
+      const res = await api.post("/api/auth/register", {
         firstName,
         lastName,
         email,
-        phoneNumber: phone, // <-- fix here
+        phoneNumber: phone,
         password,
       });
-      // ...existing code...
+
+      if (res.data?.accessToken) {
+        await AsyncStorage.setItem("token", res.data.accessToken);
+        if (res.data.user) {
+          useAuthStore.getState().setUser(res.data.user);
+        }
+      }
 
       setShowOTPForm(true);
       Alert.alert("OTP Sent", "Please check your phone for the OTP");
@@ -90,7 +98,7 @@ export default function RegisterWithOTP() {
       setIsLoading(false);
     }
   }, [firstName, lastName, email, phone, password]);
-
+  // ...existing code...
   const handleVerifyOTP = useCallback(async () => {
     const validationErrors = validateOTP();
     if (Object.keys(validationErrors).length > 0) {
@@ -102,10 +110,18 @@ export default function RegisterWithOTP() {
     setIsLoading(true);
 
     try {
-      await api.post("/api/auth/verify-otp", {
+      const res = await api.post("/api/auth/verify-otp", {
         email,
         otp,
       });
+
+      // ✅ Save token after successful verification
+      if (res.data?.accessToken) {
+        await AsyncStorage.setItem("token", res.data.accessToken);
+        if (res.data.user) {
+          useAuthStore.getState().setUser(res.data.user);
+        }
+      }
 
       Alert.alert("Success", "Your account is verified!");
       router.replace("/(tabs)/dashboard");
@@ -172,7 +188,6 @@ export default function RegisterWithOTP() {
                 />
                 <Input
                   label="Phone Number"
-                  // keyboardType="phone-pad"
                   value={phone}
                   onChangeText={(text) => {
                     setPhone(text);
@@ -208,7 +223,6 @@ export default function RegisterWithOTP() {
                 <Text style={styles.title}>Verify OTP</Text>
                 <Input
                   label="OTP"
-                  // keyboardType="number-pad"
                   value={otp}
                   onChangeText={(text) => {
                     setOTP(text);

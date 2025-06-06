@@ -1,16 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Button } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AddBudgetModal from '../../components/budgets/AddBudgetModal';
-import BudgetCategoryList from '../../components/budgets/BudgetCategorylist';
-import BudgetSummary from '../../components/budgets/Budgetsummry';
-import { Budget } from '../../types/types';
-import { getBudgets } from '../../utils/budgetApi';
-
+import React, { useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  RefreshControl,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AddBudgetModal from "../../components/budgets/AddBudgetModal";
+import BudgetCategoryList from "../../components/budgets/BudgetCategorylist";
+import BudgetSummary from "../../components/budgets/Budgetsummry";
+import { Budget } from "../../types/types";
+import { getBudgets } from "../../utils/budgetApi";
 export default function BudgetsScreen() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBudgets();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     fetchBudgets();
@@ -31,14 +43,28 @@ export default function BudgetsScreen() {
   const totalBudgeted = budgets.reduce((sum, b) => sum + b.budgeted, 0);
   const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const remaining = totalBudgeted - totalSpent;
-  const percentUsed = totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
+  const percentUsed =
+    totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView style={styles.scrollView}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#3B82F6"]}
+            tintColor="#3B82F6"
+          />
+        }
+      >
         <View style={styles.header}>
           <Text style={styles.monthTitle}>
-            {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            {new Date().toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+            })}
           </Text>
           <Text style={styles.subtitle}>Budget Overview</Text>
         </View>
@@ -56,11 +82,15 @@ export default function BudgetsScreen() {
         </View>
 
         {loading ? (
-          <Text style={{ textAlign: 'center', marginTop: 20, color: '#64748B' }}>
+          <Text
+            style={{ textAlign: "center", marginTop: 20, color: "#64748B" }}
+          >
             Loading budgets...
           </Text>
         ) : budgets.length === 0 ? (
-          <Text style={{ textAlign: 'center', marginTop: 20, color: '#64748B' }}>
+          <Text
+            style={{ textAlign: "center", marginTop: 20, color: "#64748B" }}
+          >
             No budgets found.
           </Text>
         ) : (
@@ -79,7 +109,7 @@ export default function BudgetsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F8FAFC",
   },
   scrollView: {
     flex: 1,
@@ -91,25 +121,25 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#0F172A',
+    fontWeight: "600",
+    color: "#0F172A",
   },
   subtitle: {
     fontSize: 14,
-    color: '#64748B',
+    color: "#64748B",
     marginTop: 4,
   },
   sectionHeader: {
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#0F172A',
+    fontWeight: "600",
+    color: "#0F172A",
   },
 });
