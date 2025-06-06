@@ -5,8 +5,7 @@ import {
   deleteBudget,
   getBudgetById,
   getBudgets,
-  getBudgetsByCategory,
-  updateBudget,
+  updateBudget
 } from "../controllers/budget.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -18,11 +17,11 @@ router.post("/", authenticate, createBudget);
 // Get all budgets for logged-in user
 router.get("/", authenticate, getBudgets);
 
-// Get budget by ID
-router.get("/:id", authenticate, getBudgetById);
-
 // Search by category (query param: ?category=Food)
-router.get("/search/category", authenticate, getBudgetsByCategory);
+// router.get("/search/category", authenticate, getBudgetsByCategory);
+
+// Add spent to budget
+router.post("/add-spent", authenticate, addSpentToBudget);
 
 // Update budget
 router.put("/:id", authenticate, updateBudget);
@@ -30,7 +29,7 @@ router.put("/:id", authenticate, updateBudget);
 // Delete budget
 router.delete("/:id", authenticate, deleteBudget);
 
-// ...other routes...
-router.post("/add-spent", authenticate, addSpentToBudget);
+// Get budget by ID (keep this LAST)
+router.get("/:id", authenticate, getBudgetById);
 
 export default router;
