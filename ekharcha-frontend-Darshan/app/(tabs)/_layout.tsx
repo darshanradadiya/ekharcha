@@ -72,7 +72,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="Transaction"
+        name="Transactions"
         // component={TransactionScreen}
         options={{
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
