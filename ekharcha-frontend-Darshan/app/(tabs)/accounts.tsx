@@ -1,11 +1,11 @@
 import { Plus } from "lucide-react-native";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  RefreshControl,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -96,7 +96,7 @@ export default function Accounts() {
               key={String(account._id)}
               account={{
                 ...account,
-                _id: Number(account._id),
+                _id: String(account._id),
                 id: account._id ?? String(account._id),
                 type: account.type as
                   | "credit"

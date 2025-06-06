@@ -31,49 +31,56 @@ export default function UpdateAccountModal({
   onUpdated,
 }: UpdateAccountModalProps) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<"credit" | "checking" | "savings" | "investment">("checking");
+  const [type, setType] = useState<
+    "credit" | "checking" | "savings" | "investment"
+  >("checking");
   const [balance, setBalance] = useState("");
   const [institution, setInstitution] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
 
   useEffect(() => {
     setName(account?.name || "");
-    setType(account?.type as any || "checking");
+    setType((account?.type as any) || "checking");
     setBalance(account?.balance?.toString() || "");
     setInstitution(account?.institution || "");
     setAccountNumber(account?.accountNumber || "");
   }, [account]);
 
-const handleUpdate = async () => {
-  if (!account || !account._id || typeof account._id !== "string") {
-    alert("❌ Invalid account ID");
-    return;
-  }
-
-  const parsedBalance = Number(balance);
-  if (isNaN(parsedBalance)) {
-    alert("❌ Balance must be a valid number");
-    return;
-  }
-
-  console.log("🔍 Updating ID:", account._id);
-
-  try {
-    await updateAccount(account._id, {
-      name,
-      type,
-      balance: parsedBalance,
-      institution,
-      accountNumber,
-    });
-    onUpdated();
-    onClose();
-  } catch (err) {
-    console.error("❌ Update failed:", err);
-    alert("Update failed.");
-  }
-};
-
+  const handleUpdate = async () => {
+    console.log("Account object in modal:", account);
+    if (
+      !account ||
+      !account._id ||
+      typeof account._id !== "string" ||
+      account._id === "NaN"
+    ) {
+      alert("❌ Invalid account ID");
+      return;
+    }
+  
+    const parsedBalance = Number(balance);
+    if (isNaN(parsedBalance)) {
+      alert("❌ Balance must be a valid number");
+      return;
+    }
+  
+    console.log("🔍 Updating ID:", account._id);
+  
+    try {
+      await updateAccount(account._id, {
+        name,
+        type,
+        balance: parsedBalance,
+        institution,
+        accountNumber,
+      });
+      onUpdated();
+      onClose();
+    } catch (err) {
+      console.error("❌ Update failed:", err);
+      alert("Update failed.");
+    }
+  };
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -88,7 +95,10 @@ const handleUpdate = async () => {
         />
 
         <View style={styles.pickerContainer}>
-          <Picker selectedValue={type} onValueChange={(itemValue) => setType(itemValue)}>
+          <Picker
+            selectedValue={type}
+            onValueChange={(itemValue) => setType(itemValue)}
+          >
             <Picker.Item label="Checking" value="checking" />
             <Picker.Item label="Savings" value="savings" />
             <Picker.Item label="Credit" value="credit" />
