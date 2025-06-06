@@ -61,8 +61,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Budget"
-        // component={BudgetScreen}
+        name="budget"
         options={{
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <PieChart size={size} color={color} />
@@ -70,10 +69,8 @@ export default function TabLayout() {
           tabBarLabel: "Budget",
         }}
       />
-
       <Tabs.Screen
-        name="Transactions"
-        // component={TransactionScreen}
+        name="transactions"
         options={{
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <ListOrdered size={size} color={color} />
@@ -81,7 +78,6 @@ export default function TabLayout() {
           tabBarLabel: "Transactions",
         }}
       />
-
       <Tabs.Screen
         name="accounts"
         options={{

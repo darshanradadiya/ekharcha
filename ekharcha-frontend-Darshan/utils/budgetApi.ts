@@ -1,63 +1,45 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { Budget } from "../types/types";
-
-const getAuthToken = async () => {
-  return await AsyncStorage.getItem("token"); // "token" is the key you used to store the JWT
-};
-const BASE_URL = "http://192.168.170.220:8000/api/budget";
+import api from "./api";
 
 // Get all budgets
 export const getBudgets = async (): Promise<Budget[]> => {
-  const token = await getAuthToken();
-  const res = await axios.get(`${BASE_URL}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+  // Assumes your backend returns { budgets: Budget[] }
+  const res = await api.get<{ budgets: Budget[] }>("/api/budget");
+  return res.data.budgets;
 };
 
 // Get budget by ID
 export const getBudgetById = async (id: string): Promise<Budget> => {
-  const token = await getAuthToken();
-  const res = await axios.get(`${BASE_URL}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+  const res = await api.get<{ budget: Budget }>(`/api/budget/${id}`);
+  return res.data.budget;
 };
 
 // Search budgets by category
 export const searchBudgetsByCategory = async (category: string): Promise<Budget[]> => {
-  const token = await getAuthToken();
-  const res = await axios.get(`${BASE_URL}/search/category`, {
+  const res = await api.get<{ budgets: Budget[] }>(`/api/budget/search/category`, {
     params: { category },
-    headers: { Authorization: `Bearer ${token}` },
   });
-  return res.data;
+  return res.data.budgets;
 };
 
 // Create new budget
 export const createBudget = async (data: {
   category: string;
   budgeted: number;
-}) => {
-  const token = await getAuthToken();
-  const res = await axios.post(`${BASE_URL}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  // If your backend returns { budget: ... }
+}): Promise<Budget> => {
+  const res = await api.post<{ budget: Budget }>("/api/budget", data);
   return res.data.budget;
-  // If your backend returns just the object, use: return res.data;
 };
 
-export const addSpentToBudget = async (category: string, amount: number) => {
-  const token = await getAuthToken();
-  const res = await axios.post(
-    `${BASE_URL}/add-spent`,
-    { category, amount },
-    { headers: { Authorization: `Bearer ${token}` } }
+// Add spent to budget
+export const addSpentToBudget = async (category: string, amount: number): Promise<Budget> => {
+  const res = await api.post<{ budget: Budget }>(
+    "/api/budget/add-spent",
+    { category, amount }
   );
   return res.data.budget;
 };
+
 // Update existing budget
 export const updateBudget = async (
   id: string,
@@ -67,17 +49,12 @@ export const updateBudget = async (
     spent?: number;
   }
 ): Promise<Budget> => {
-  const token = await getAuthToken();
-  const res = await axios.put(`${BASE_URL}/${id}`, updates, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.put<{ budget: Budget }>(`/api/budget/${id}`, updates);
   return res.data.budget;
 };
 
 // Delete budget
-export const deleteBudget = async (id: string): Promise<void> => {
-  const token = await getAuthToken();
-  await axios.delete(`${BASE_URL}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const deleteBudget = async (id: string): Promise<{ success: boolean; message?: string }> => {
+  const res = await api.delete<{ success: boolean; message?: string }>(`/api/budget/${id}`);
+  return res.data;
 };

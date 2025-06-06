@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
+  Button,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Button,
-  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AddBudgetModal from "../../components/budgets/AddBudgetModal";
@@ -29,11 +29,12 @@ export default function BudgetsScreen() {
   }, []);
 
   const fetchBudgets = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await getBudgets();
-      setBudgets(data);
+      setBudgets(data ?? []); // fallback to empty array if undefined
     } catch (err) {
+      setBudgets([]); // fallback on error
       console.error("Failed to fetch budgets:", err);
     } finally {
       setLoading(false);
