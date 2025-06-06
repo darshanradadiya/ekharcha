@@ -13,10 +13,15 @@ export const getBudgetById = async (id: string): Promise<Budget> => {
 };
 
 // Search budgets by category
-export const searchBudgetsByCategory = async (category: string): Promise<Budget[]> => {
-  const res = await api.get<{ budgets: Budget[] }>(`/api/budget/search/category`, {
-    params: { category },
-  });
+export const searchBudgetsByCategory = async (
+  category: string
+): Promise<Budget[]> => {
+  const res = await api.get<{ budgets: Budget[] }>(
+    `/api/budget/search/category`,
+    {
+      params: { category },
+    }
+  );
   return res.data.budgets;
 };
 
@@ -30,11 +35,14 @@ export const createBudget = async (data: {
 };
 
 // Add spent to budget
-export const addSpentToBudget = async (category: string, amount: number): Promise<Budget> => {
-  const res = await api.post<{ budget: Budget }>(
-    "/api/budget/add-spent",
-    { category, amount }
-  );
+export const addSpentToBudget = async (
+  category: string,
+  amount: number
+): Promise<Budget> => {
+  const res = await api.post<{ budget: Budget }>("/api/budget/add-spent", {
+    category,
+    amount,
+  });
   return res.data.budget;
 };
 
@@ -52,7 +60,22 @@ export const updateBudget = async (
 };
 
 // Delete budget
-export const deleteBudget = async (id: string): Promise<{ success: boolean; message?: string }> => {
-  const res = await api.delete<{ success: boolean; message?: string }>(`/api/budget/${id}`);
+export const deleteBudget = async (
+  id: string
+): Promise<{ success: boolean; message?: string }> => {
+  const res = await api.delete<{ success: boolean; message?: string }>(
+    `/api/budget/${id}`
+  );
   return res.data;
+};
+
+export const editSpentInBudgetApi = async (
+  id: string,
+  spent: number
+): Promise<Budget> => {
+  const res = await api.put<{ budget: Budget }>(
+    `/api/budget/edit-spent/${id}`,
+    { spent }
+  );
+  return res.data.budget;
 };

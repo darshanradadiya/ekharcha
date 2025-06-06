@@ -15,8 +15,8 @@ export const addTransaction = async (req, res) => {
       amount,
       date,
       type,
-      accountId : req.body.accountId,
-      category : req.body.category,
+      accountId: req.body.accountId,
+      category: req.body.category,
       userId: req.user.id,
     });
     await transaction.save();

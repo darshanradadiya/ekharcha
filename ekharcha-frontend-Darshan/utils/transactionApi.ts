@@ -9,11 +9,14 @@ export const getTransactions = async (): Promise<Transaction[]> => {
 
 // Add a new transaction
 export const createTransaction = async (data: {
+  _id ?: string; // Optional ID for editing existing transactions
   description: string;
   amount: number;
   date: string;
   type: "income" | "expense";
-  // category?: string; // Remove if not needed
+  accountId ?: string;
+  // category?: string;
+  [key: string]: any; // For additional fields if needed
 }): Promise<Transaction> => {
   const res = await api.post("/api/transactions", data);
   return res.data.transaction;

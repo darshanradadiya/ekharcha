@@ -25,6 +25,7 @@ app.use(express.json());
 
 app.use(cors({
   origin: 'https://ekharcha-1.onrender.com', // For production, replace with your frontend domain like: 'https://yourapp.com'
+  // origin: "*", // For development, allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));

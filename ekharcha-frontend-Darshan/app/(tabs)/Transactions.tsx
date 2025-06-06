@@ -10,7 +10,6 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import AddTransactionModal from "../../components/transcations/AddTransactionModal";
 import TransactionItem from "../../components/transcations/TransactionItem";
 import { Transaction } from "../../types/types";
@@ -18,17 +17,10 @@ import { getTransactions } from "../../utils/transactionApi";
 
 export default function TransactionsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  // const [showFilters, setShowFilters] = useState(false);
-  // const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchTransactions();
-    setRefreshing(false);
-  };
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -46,14 +38,15 @@ export default function TransactionsScreen() {
     fetchTransactions();
   }, []);
 
-  // If you have removed category from your backend, update the filter logic:
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesSearch = transaction.description
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    // Remove category filtering if category is not present
-    return matchesSearch;
-  });
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchTransactions();
+    setRefreshing(false);
+  };
+
+  const filteredTransactions = transactions.filter((transaction) =>
+    transaction.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -73,11 +66,7 @@ export default function TransactionsScreen() {
             </TouchableOpacity>
           )}
         </View>
-        {/* Remove filter button if you don't have category filtering */}
       </View>
-
-      {/* Remove TransactionFilters if you don't have category filtering */}
-
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -88,7 +77,7 @@ export default function TransactionsScreen() {
         <FlatList
           data={filteredTransactions}
           renderItem={({ item }: { item: Transaction }) => (
-            <TransactionItem transaction={item} />
+            <TransactionItem transaction={item} onDeleted={fetchTransactions} />
           )}
           keyExtractor={(item) => item._id?.toString() || item.id?.toString()}
           contentContainerStyle={styles.listContent}
@@ -97,16 +86,16 @@ export default function TransactionsScreen() {
               <Text style={styles.emptyText}>No transactions found</Text>
             </View>
           }
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
-
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setShowAddModal(true)}
       >
         <Text style={styles.addButtonText}>+ Add Transaction</Text>
       </TouchableOpacity>
-
       <AddTransactionModal
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -117,6 +106,7 @@ export default function TransactionsScreen() {
 }
 
 const styles = StyleSheet.create({
+  // ...same as your current styles...
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",

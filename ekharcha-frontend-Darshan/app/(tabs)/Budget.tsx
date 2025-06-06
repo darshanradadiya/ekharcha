@@ -11,34 +11,44 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AddBudgetModal from "../../components/budgets/AddBudgetModal";
 import BudgetCategoryList from "../../components/budgets/BudgetCategorylist";
 import BudgetSummary from "../../components/budgets/Budgetsummry";
+import EditBudgetModal from "../../components/budgets/EditBudgetModal";
+import EditSpentModal from "../../components/budgets/EditSpentModel";
 import { Budget } from "../../types/types";
 import { getBudgets } from "../../utils/budgetApi";
+
 export default function BudgetsScreen() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showAdd, setShowAdd] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchBudgets();
-    setRefreshing(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [showEditSpent, setShowEditSpent] = useState(false);
+  const [selectedSpentBudget, setSelectedSpentBudget] = useState<Budget | null>(
+    null
+  );
+
+  const fetchBudgets = async () => {
+    setLoading(true);
+    try {
+      const data = await getBudgets();
+      setBudgets(data ?? []);
+    } catch (err) {
+      setBudgets([]);
+      console.error("Failed to fetch budgets:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchBudgets();
   }, []);
 
-  const fetchBudgets = async () => {
-    setLoading(true);
-    try {
-      const data = await getBudgets();
-      setBudgets(data ?? []); // fallback to empty array if undefined
-    } catch (err) {
-      setBudgets([]); // fallback on error
-      console.error("Failed to fetch budgets:", err);
-    } finally {
-      setLoading(false);
-    }
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBudgets();
+    setRefreshing(false);
   };
 
   const totalBudgeted = budgets.reduce((sum, b) => sum + b.budgeted, 0);
@@ -55,8 +65,8 @@ export default function BudgetsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#3B82F6"]}
-            tintColor="#3B82F6"
+            colors={["#2563EB"]}
+            tintColor="#2563EB"
           />
         }
       >
@@ -67,7 +77,7 @@ export default function BudgetsScreen() {
               year: "numeric",
             })}
           </Text>
-          <Text style={styles.subtitle}>Budget Overview</Text>
+          <Text style={styles.subtitle}>Overview of your monthly budget</Text>
         </View>
 
         <BudgetSummary
@@ -78,31 +88,65 @@ export default function BudgetsScreen() {
         />
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Budget Categories</Text>
-          <Button title="Add Budget" onPress={() => setShowAdd(true)} />
+          <Text style={styles.sectionTitle}>Categories</Text>
+          <Button
+            title="Add"
+            color="#2563EB"
+            onPress={() => setShowAdd(true)}
+          />
         </View>
 
         {loading ? (
-          <Text
-            style={{ textAlign: "center", marginTop: 20, color: "#64748B" }}
-          >
-            Loading budgets...
-          </Text>
+          <Text style={styles.loadingText}>Loading budgets...</Text>
         ) : budgets.length === 0 ? (
-          <Text
-            style={{ textAlign: "center", marginTop: 20, color: "#64748B" }}
-          >
-            No budgets found.
-          </Text>
+          <Text style={styles.loadingText}>No budgets found.</Text>
         ) : (
-          <BudgetCategoryList budgets={budgets} onSpentAdded={fetchBudgets} />
+          <BudgetCategoryList
+            budgets={budgets}
+            onSpentAdded={fetchBudgets}
+            onEdit={(budget) => {
+              setSelectedBudget(budget);
+              setShowEdit(true);
+            }}
+            onEditSpent={(budget) => {
+              setSelectedSpentBudget(budget);
+              setShowEditSpent(true);
+            }}
+          />
         )}
       </ScrollView>
+
       <AddBudgetModal
         visible={showAdd}
         onClose={() => setShowAdd(false)}
         onCreated={fetchBudgets}
       />
+
+      {selectedBudget && (
+        <EditBudgetModal
+          visible={showEdit}
+          budget={selectedBudget}
+          onClose={() => setShowEdit(false)}
+          onUpdated={() => {
+            setShowEdit(false);
+            setSelectedBudget(null);
+            fetchBudgets();
+          }}
+        />
+      )}
+
+      {selectedSpentBudget && (
+        <EditSpentModal
+          visible={showEditSpent}
+          budget={selectedSpentBudget}
+          onClose={() => setShowEditSpent(false)}
+          onUpdated={() => {
+            setShowEditSpent(false);
+            setSelectedSpentBudget(null);
+            fetchBudgets();
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -110,30 +154,30 @@ export default function BudgetsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#F1F5F9",
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
   },
   monthTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#0F172A",
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1E293B",
   },
   subtitle: {
-    fontSize: 14,
-    color: "#64748B",
-    marginTop: 4,
+    fontSize: 15,
+    color: "#475569",
+    marginTop: 6,
   },
   sectionHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -141,6 +185,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#1E293B",
+  },
+  loadingText: {
+    textAlign: "center",
+    marginTop: 24,
+    color: "#94A3B8",
+    fontSize: 14,
   },
 });

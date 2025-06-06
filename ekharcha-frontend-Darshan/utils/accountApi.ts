@@ -8,6 +8,8 @@ export interface Account {
   balance: number;
   institution: string;
   accountNumber: string;
+  relatedAccountId?: string; // Assuming this is a reference to another account or user
+  accountId?: string; // Optional, for linking to a user or another entity
   [key: string]: any;
 }
 

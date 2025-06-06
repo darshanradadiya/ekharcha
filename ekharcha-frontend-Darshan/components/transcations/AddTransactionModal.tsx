@@ -1,16 +1,12 @@
-import { Picker } from "@react-native-picker/picker";
+import { Picker } from "@react-native-picker/picker"; // ✅ Import added here
 import React, { useEffect, useState } from "react";
 import {
-  Keyboard,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { getAccounts } from "../../utils/accountApi";
@@ -32,13 +28,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [type, setType] = useState<"income" | "expense">("expense");
   const [accountId, setAccountId] = useState("");
-  const [accounts, setAccounts] = useState<{ _id: string; name: string }[]>([]);
   const [category, setCategory] = useState("");
+  const [accounts, setAccounts] = useState<{ _id: string; name: string }[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (visible) {
-      getAccounts().then(setAccounts).catch(() => setAccounts([]));
+      getAccounts()
+        .then(setAccounts)
+        .catch(() => setAccounts([]));
     }
   }, [visible]);
 
@@ -54,16 +52,10 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         description,
         date,
         type,
-        accountId ,
+        accountId,
         category,
       });
-      setAmount("");
-      setDescription("");
-      setDate(new Date().toISOString().split("T")[0]);
-      setType("expense");
-      setAccountId("");
-      setCategory("");
-      onClose();
+      handleClose();
       onAdded();
     } catch (e: any) {
       setError(e?.response?.data?.message || "Failed to add transaction");
@@ -83,71 +75,64 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <View style={styles.modalContent}>
-              <ScrollView>
-                <Text style={styles.title}>Add Transaction</Text>
-                <TextInput
-                  placeholder="Amount"
-                  value={amount}
-                  onChangeText={setAmount}
-                  keyboardType="decimal-pad"
-                  style={styles.input}
-                />
-                <TextInput
-                  placeholder="Description"
-                  value={description}
-                  onChangeText={setDescription}
-                  style={styles.input}
-                />
-                <TextInput
-                  placeholder="Date (YYYY-MM-DD)"
-                  value={date}
-                  onChangeText={setDate}
-                  style={styles.input}
-                />
-                <View style={styles.pickerWrapper}>
-                  <Picker selectedValue={type} onValueChange={setType}>
-                    <Picker.Item label="Expense" value="expense" />
-                    <Picker.Item label="Income" value="income" />
-                  </Picker>
-                </View>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={accountId}
-                    onValueChange={setAccountId}
-                  >
-                    <Picker.Item label="Select Account" value="" />
-                    {accounts.map((acc) => (
-                      <Picker.Item key={acc._id} label={acc.name} value={acc._id} />
-                    ))}
-                  </Picker>
-                </View>
-                <TextInput
-                  placeholder="Category (optional)"
-                  value={category}
-                  onChangeText={setCategory}
-                  style={styles.input}
-                />
-                {error ? <Text style={styles.error}>{error}</Text> : null}
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                    <Text style={styles.saveButtonText}>Save</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
+      <View style={styles.backdrop}>
+        <View style={styles.modalContent}>
+          <ScrollView>
+            <Text style={styles.title}>Add Transaction</Text>
+            <TextInput
+              placeholder="Amount"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Description"
+              value={description}
+              onChangeText={setDescription}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Date (YYYY-MM-DD)"
+              value={date}
+              onChangeText={setDate}
+              style={styles.input}
+            />
+            <View style={styles.pickerWrapper}>
+              <Picker selectedValue={type} onValueChange={setType}>
+                <Picker.Item label="Expense" value="expense" />
+                <Picker.Item label="Income" value="income" />
+              </Picker>
             </View>
-          </KeyboardAvoidingView>
+            <View style={styles.pickerWrapper}>
+              <Picker selectedValue={accountId} onValueChange={setAccountId}>
+                <Picker.Item label="Select Account" value="" />
+                {accounts.map((acc) => (
+                  <Picker.Item key={acc._id} label={acc.name} value={acc._id} />
+                ))}
+              </Picker>
+            </View>
+            <TextInput
+              placeholder="Category (optional)"
+              value={category}
+              onChangeText={setCategory}
+              style={styles.input}
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleClose}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 };
@@ -191,7 +176,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
     backgroundColor: "#F8FAFC",
-    overflow: "hidden",
   },
   buttonRow: {
     flexDirection: "row",

@@ -1,52 +1,44 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { CircleArrowUp as ArrowUpCircle, CircleArrowDown as ArrowDownCircle, MoveVertical as MoreVertical } from 'lucide-react-native';
-import { Transaction } from '../../types/types';
+import React from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Transaction } from "../../types/types";
+import { deleteTransaction } from "../../utils/transactionApi";
 
-interface TransactionItemProps {
+interface Props {
   transaction: Transaction;
+  onDeleted?: () => void;
 }
 
-const TransactionItem = ({ transaction }: TransactionItemProps) => {
-  const { description, amount, category, date, type } = transaction;
-  
-  const isIncome = type === 'income';
-  
+const TransactionItem: React.FC<Props> = ({ transaction, onDeleted }) => {
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Transaction",
+      "Are you sure you want to delete this transaction?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deleteTransaction(transaction._id || transaction.id);
+            if (onDeleted) onDeleted();
+          },
+        },
+      ]
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.leftContent}>
-        <View style={[
-          styles.iconContainer, 
-          isIncome ? styles.incomeIconContainer : styles.expenseIconContainer
-        ]}>
-          {isIncome ? (
-            <ArrowUpCircle size={20} color="#FFFFFF" />
-          ) : (
-            <ArrowDownCircle size={20} color="#FFFFFF" />
-          )}
-        </View>
-        
-        <View style={styles.details}>
-          <Text style={styles.description}>{description}</Text>
-          <View style={styles.metaContainer}>
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>{category}</Text>
-            </View>
-            <Text style={styles.date}>{date}</Text>
-          </View>
-        </View>
+    <View style={styles.item}>
+      <View>
+        <Text style={styles.desc}>{transaction.description}</Text>
+        <Text style={styles.date}>{transaction.date}</Text>
       </View>
-      
-      <View style={styles.rightContent}>
-        <Text style={[
-          styles.amount,
-          isIncome ? styles.incomeAmount : styles.expenseAmount
-        ]}>
-          {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
+      <View style={{ alignItems: "flex-end" }}>
+        <Text style={[styles.amount, { color: transaction.type === "income" ? "#10B981" : "#EF4444" }]}>
+          {transaction.type === "income" ? "+" : "-"}₹{transaction.amount}
         </Text>
-        
-        <TouchableOpacity style={styles.moreButton}>
-          <MoreVertical size={16} color="#64748B" />
+        <TouchableOpacity onPress={handleDelete}>
+          <Text style={styles.delete}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -54,79 +46,35 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+  item: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 6,
+    marginHorizontal: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    elevation: 1,
   },
-  leftContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  incomeIconContainer: {
-    backgroundColor: '#10B981',
-  },
-  expenseIconContainer: {
-    backgroundColor: '#EF4444',
-  },
-  details: {
-    flex: 1,
-  },
-  description: {
+  desc: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-  metaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  categoryText: {
-    fontSize: 12,
-    color: '#64748B',
+    fontWeight: "600",
+    color: "#0F172A",
   },
   date: {
-    fontSize: 12,
-    color: '#94A3B8',
-  },
-  rightContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 2,
   },
   amount: {
     fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
+    fontWeight: "700",
   },
-  incomeAmount: {
-    color: '#10B981',
-  },
-  expenseAmount: {
-    color: '#EF4444',
-  },
-  moreButton: {
-    padding: 4,
+  delete: {
+    color: "#EF4444",
+    marginTop: 6,
+    fontWeight: "600",
   },
 });
 

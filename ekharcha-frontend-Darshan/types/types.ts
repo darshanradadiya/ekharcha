@@ -1,6 +1,7 @@
 // Type definitions for the Finance Tracker app
 
 export interface Transaction {
+  _id: any;
   id: number;
   description: string;
   amount: number;
@@ -18,10 +19,8 @@ export interface Budget {
   createdAt: string;
   updatedAt: string;
 }
-
-
 export interface Account {
-  _id: number;
+  _id: string;
   id: string;
   name: string;
   type: 'checking' | 'savings' | 'credit' | 'investment';

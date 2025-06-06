@@ -17,7 +17,7 @@ const RecentTransactions: React.FC<Props> = ({ recentTransactions }) => {
         <Text style={styles.title}>Recent Transactions</Text>
         <TouchableOpacity
           style={styles.viewAllButton}
-          onPress={() => router.push("/transcation")}
+          onPress={() => router.push("/(tabs)/transactions")}
         >
           <Text style={styles.viewAllText}>View All</Text>
           <ChevronRight size={16} color="#3B82F6" />

@@ -107,12 +107,11 @@ export const getBudgetById = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
     return res.status(200).json(budget);
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error fetching budget:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 export const getBudgetsByCategory = async (req, res) => {
   const { category } = req.query;
@@ -124,7 +123,7 @@ export const getBudgetsByCategory = async (req, res) => {
 
     const budgets = await Budget.find({
       userId: req.user.id,
-      category: new RegExp(category, 'i'), // Case-insensitive search
+      category: new RegExp(category, "i"), // Case-insensitive search
     });
 
     return res.status(200).json({ budgets });
@@ -139,7 +138,9 @@ export const addSpentToBudget = async (req, res) => {
   const { amount } = req.body; // amount to add to spent
 
   if (!category || typeof amount !== "number") {
-    return res.status(400).json({ message: "Category and amount are required" });
+    return res
+      .status(400)
+      .json({ message: "Category and amount are required" });
   }
 
   try {
@@ -152,6 +153,35 @@ export const addSpentToBudget = async (req, res) => {
       return res.status(404).json({ message: "Budget category not found" });
     }
     return res.status(200).json({ budget });
+  } catch (error) {
+    console.error("Error updating spent:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const editSpentInBudget = async (req, res) => {
+  const { id } = req.params;
+  const { spent } = req.body;
+
+  if (spent === undefined) {
+    return res.status(400).json({ message: "Spent amount is required" });
+  }
+
+  try {
+    const budget = await Budget.findById(id);
+    if (!budget) {
+      return res.status(404).json({ message: "Budget not found" });
+    }
+    if (budget.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    budget.spent = spent;
+    await budget.save();
+    return res.status(200).json({
+      message: "Spent updated successfully",
+      budget,
+    });
   } catch (error) {
     console.error("Error updating spent:", error);
     return res.status(500).json({ message: "Internal server error" });

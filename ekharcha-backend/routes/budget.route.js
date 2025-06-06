@@ -3,6 +3,7 @@ import {
   addSpentToBudget,
   createBudget,
   deleteBudget,
+  editSpentInBudget,
   getBudgetById,
   getBudgets,
   updateBudget
@@ -22,6 +23,9 @@ router.get("/", authenticate, getBudgets);
 
 // Add spent to budget
 router.post("/add-spent", authenticate, addSpentToBudget);
+
+// router.put("/edit-spent/:id", editSpentInBudget);
+router.put("/edit-spent/:id", authenticate, editSpentInBudget);
 
 // Update budget
 router.put("/:id", authenticate, updateBudget);
