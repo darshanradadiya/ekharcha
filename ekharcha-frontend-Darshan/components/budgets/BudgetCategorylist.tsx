@@ -1,6 +1,6 @@
+import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, TrendingUp } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
-import { TriangleAlert as AlertTriangle, TrendingUp, CircleCheck as CheckCircle } from 'lucide-react-native';
+import { Button, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Budget } from '../../types/types';
 import AddSpentModal from './AddSpentModal';
 
@@ -79,12 +79,15 @@ const BudgetCategoryList = ({ budgets, onSpentAdded }: BudgetCategoryListProps) 
 
   return (
     <View style={styles.container}>
+      {/* // ...existing code... */}
       <FlatList
         data={budgets}
         renderItem={renderBudgetItem}
-        keyExtractor={(item) => item.category}
+        // Use a unique key: prefer _id, fallback to category+index
+        keyExtractor={(item, idx) => item._id ? String(item._id) : `${item.category}-${idx}`}
         scrollEnabled={false}
       />
+      {/* // ...existing code... */}
       <AddSpentModal
         visible={showModal}
         onClose={() => setShowModal(false)}

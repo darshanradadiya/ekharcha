@@ -7,18 +7,32 @@ export const createBudget = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newBudget = new Budget({
-      category,
-      budgeted,
-      spent,
-      userId: req.user.id,
-    });
+    // Check if budget for this user and category already exists
+    let budget = await Budget.findOne({ userId: req.user.id, category });
 
-    await newBudget.save();
-    return res.status(201).json({
-      message: "Budget created successfully",
-      budget: newBudget,
-    });
+    if (budget) {
+      // Update existing budget
+      budget.budgeted = budgeted;
+      if (spent !== undefined) budget.spent = spent;
+      await budget.save();
+      return res.status(200).json({
+        message: "Budget updated successfully",
+        budget,
+      });
+    } else {
+      // Create new budget
+      const newBudget = new Budget({
+        category,
+        budgeted,
+        spent,
+        userId: req.user.id,
+      });
+      await newBudget.save();
+      return res.status(201).json({
+        message: "Budget created successfully",
+        budget: newBudget,
+      });
+    }
   } catch (error) {
     console.error("Error creating budget:", error);
     return res.status(500).json({ message: "Internal server error" });
