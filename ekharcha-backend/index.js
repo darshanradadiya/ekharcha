@@ -24,7 +24,7 @@ if (!MONGO_URI) {
 app.use(express.json());
 
 app.use(cors({
-  origin: 'https://ekharcha-1.onrender.com/', // For production, replace with your frontend domain like: 'https://yourapp.com'
+  origin: 'https://ekharcha-1.onrender.com', // For production, replace with your frontend domain like: 'https://yourapp.com'
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
