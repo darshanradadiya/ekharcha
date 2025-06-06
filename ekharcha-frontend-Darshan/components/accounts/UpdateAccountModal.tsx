@@ -44,17 +44,36 @@ export default function UpdateAccountModal({
     setAccountNumber(account?.accountNumber || "");
   }, [account]);
 
-  const handleUpdate = async () => {
+const handleUpdate = async () => {
+  if (!account || !account._id || typeof account._id !== "string") {
+    alert("❌ Invalid account ID");
+    return;
+  }
+
+  const parsedBalance = Number(balance);
+  if (isNaN(parsedBalance)) {
+    alert("❌ Balance must be a valid number");
+    return;
+  }
+
+  console.log("🔍 Updating ID:", account._id);
+
+  try {
     await updateAccount(account._id, {
       name,
       type,
-      balance: Number(balance),
+      balance: parsedBalance,
       institution,
       accountNumber,
     });
     onUpdated();
     onClose();
-  };
+  } catch (err) {
+    console.error("❌ Update failed:", err);
+    alert("Update failed.");
+  }
+};
+
 
   return (
     <Modal visible={visible} animationType="slide">
