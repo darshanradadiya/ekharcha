@@ -9,7 +9,7 @@ import api from '../../utils/api';
 // Google Auth imports
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import DashboardScreen from '../(tabs)/dashboard';
+import DashboardScreen from '../(tabs)';
 
 WebBrowser.maybeCompleteAuthSession();
 

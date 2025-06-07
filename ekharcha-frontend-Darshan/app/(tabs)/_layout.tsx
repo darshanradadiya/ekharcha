@@ -51,9 +51,9 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="dashboard"
+        name="index"
         options={{
-          title: "Dashboard",
+          title: "index",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <PieChart size={size} color={color} />
           ),
