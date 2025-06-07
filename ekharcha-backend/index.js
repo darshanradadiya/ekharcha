@@ -26,9 +26,9 @@ if (!MONGO_URI) {
 app.use(express.json());
 
 app.use(cors({
-  // origin: 'https://ekharcha-production.up.railway.app', // For production, replace with your frontend domain like: 'https://yourapp.com'
+  origin: 'https://ekharcha-production.up.railway.app', // For production, replace with your frontend domain like: 'https://yourapp.com'
   // origin: "*", // For development, allow all origins
-  origin : "http://192.168.99.195:8000",
+  // origin : "http://192.168.99.195:8000",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
