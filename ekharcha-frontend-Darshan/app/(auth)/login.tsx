@@ -9,7 +9,7 @@ import api from '../../utils/api';
 // Google Auth imports
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import DashboardScreen from '../(tabs)';
+import DashboardScreen from '../(tabs)/index';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,7 +37,7 @@ export default function Login() {
     try {
       const res = await api.post('/api/auth/google-login', { token });
       // Save tokens/user as needed (e.g., in your auth store)
-      router.replace('/(tabs)/dashboard');
+      router.replace('/(tabs)'); // always go to dashboard after login
     } catch (err) {
       setError('Google login failed');
     }
@@ -47,7 +47,7 @@ export default function Login() {
     try {
       setError('');
       await login(email, password);
-      router.replace('/(tabs)/dashboard'); // always go to dashboard after login
+      router.replace('/(tabs)'); // always go to dashboard after login
     } catch (err: any) {
       if (err?.response?.status === 403) {
         setShowOTP(true);

@@ -1,17 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-// In a real app, this would use data from your state/API
-const categories = [
-  { name: 'Food & Dining', percentage: 30, color: '#EF4444' },
-  { name: 'Housing', percentage: 25, color: '#3B82F6' },
-  { name: 'Transportation', percentage: 15, color: '#F59E0B' },
-  { name: 'Entertainment', percentage: 10, color: '#8B5CF6' },
-  { name: 'Shopping', percentage: 12, color: '#10B981' },
-  { name: 'Other', percentage: 8, color: '#64748B' },
-];
+type Category = {
+  name: string;
+  percentage: number;
+  color: string;
+};
 
-const CategoryBreakdown = () => {
+interface Props {
+  categories: Category[];
+}
+
+const CategoryBreakdown = ({ categories }: Props) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Spending by Category</Text>
@@ -19,11 +19,13 @@ const CategoryBreakdown = () => {
       <View style={styles.pieChartContainer}>
         <View style={styles.pieChart}>
           {categories.map((category, index) => {
-            // This is a simplified way to create a pie chart
-            // In a real app, you'd use a proper charting library
-            const rotate = index === 0 ? 0 : 
-              categories.slice(0, index).reduce((sum, cat) => sum + cat.percentage, 0) * 3.6;
-            
+            const rotate =
+              index === 0
+                ? 0
+                : categories
+                    .slice(0, index)
+                    .reduce((sum, cat) => sum + cat.percentage, 0) * 3.6;
+
             return (
               <View
                 key={category.name}

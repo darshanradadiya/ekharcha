@@ -1,52 +1,91 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CategoryBreakdown from '../../components/reports/CategoryBreakdown';
 import IncomeExpenseChart from '../../components/reports/IncomeExpenseChar';
 import SpendingTrend from '../../components/reports/SpendingTrend';
-import { mockMonthlyData } from '../../data/mockdata';
+import { getCategoryBreakdown, getMonthlyReport } from '../../utils/reports';
 
 type Period = '1M' | '3M' | '6M' | '1Y' | 'ALL';
 
 export default function ReportsScreen() {
   const [period, setPeriod] = useState<Period>('3M');
-  
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
   const periods: Period[] = ['1M', '3M', '6M', '1Y', 'ALL'];
-  
-  // Filter data based on selected period
-  const getFilteredData = () => {
-    switch(period) {
-      case '1M':
-        return mockMonthlyData.slice(0, 1);
-      case '3M':
-        return mockMonthlyData.slice(0, 3);
-      case '6M':
-        return mockMonthlyData.slice(0, 6);
-      case '1Y':
-        return mockMonthlyData.slice(0, 12);
-      case 'ALL':
-      default:
-        return mockMonthlyData;
+
+  const fetchData = async (selectedPeriod = period) => {
+    setLoading(true);
+    try {
+      const [monthly, category] = await Promise.all([
+        getMonthlyReport(selectedPeriod),
+        getCategoryBreakdown(selectedPeriod),
+      ]);
+      console.log('Monthly Data:', monthly);
+      console.log('Category Data:', category);
+      setMonthlyData(monthly);
+      setCategoryData(category);
+    } catch (err) {
+      setMonthlyData([]);
+      setCategoryData([]);
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const filteredData = getFilteredData();
-  
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2563EB']}
+            tintColor="#2563EB"
+          />
+        }
+      >
         <View style={styles.header}>
           <Text style={styles.title}>Financial Reports</Text>
           <View style={styles.periodSelector}>
             {periods.map((p) => (
               <TouchableOpacity
                 key={p}
-                style={[styles.periodButton, period === p && styles.activePeriodButton]}
+                style={[
+                  styles.periodButton,
+                  period === p && styles.activePeriodButton,
+                ]}
                 onPress={() => setPeriod(p)}
               >
-                <Text 
-                  style={[styles.periodButtonText, period === p && styles.activePeriodButtonText]}
+                <Text
+                  style={[
+                    styles.periodButtonText,
+                    period === p && styles.activePeriodButtonText,
+                  ]}
                 >
                   {p}
                 </Text>
@@ -54,10 +93,15 @@ export default function ReportsScreen() {
             ))}
           </View>
         </View>
-        
-        <IncomeExpenseChart data={filteredData} />
-        <CategoryBreakdown />
-        <SpendingTrend data={filteredData} />
+        {loading ? (
+          <ActivityIndicator size="large" color="#3B82F6" style={{ marginTop: 40 }} />
+        ) : (
+          <>
+            <IncomeExpenseChart data={monthlyData} />
+            <CategoryBreakdown categories={categoryData} />
+            <SpendingTrend data={monthlyData} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

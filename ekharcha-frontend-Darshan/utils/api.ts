@@ -4,7 +4,7 @@ import axios from "axios";
 
 // ✅ Use environment variable from .env
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.170.220:8000",
+  baseURL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.170.220:8000" || "http://192.168.99.195:8000",
 });
 
 // 🛡️ Add token to headers
